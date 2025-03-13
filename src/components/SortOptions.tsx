@@ -12,10 +12,18 @@ interface SortOptionsProps {
 }
 
 export function SortOptions({ assetType }: SortOptionsProps) {
+  const handleValueChange = (value: string) => {
+    // Dispatch custom event with the selected sort option
+    const event = new CustomEvent("sort-option-change", {
+      detail: { sort: value },
+    });
+    document.dispatchEvent(event);
+  };
+
   return (
     <div id="sort-options-container">
-      <Select>
-        <SelectTrigger className="w-[180px]">
+      <Select onValueChange={handleValueChange} defaultValue="name-asc">
+        <SelectTrigger className="w-[180px]" data-testid="sort-options">
           <SelectValue placeholder="Name (A-Z)" />
         </SelectTrigger>
         <SelectContent>

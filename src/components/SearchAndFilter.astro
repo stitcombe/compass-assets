@@ -70,13 +70,7 @@ const formatOptions = getFormatOptions();
 <script define:vars={{ assetType }}>
   // DOM elements
   const searchInput = document.getElementById('search-input');
-  const formatFilterContainer = document.getElementById('format-filter-container');
-  const sortOptionsContainer = document.getElementById('sort-options-container');
   const activeFilters = document.getElementById('active-filters');
-  
-  // Get the actual select elements
-  const formatFilter = formatFilterContainer?.querySelector('[data-slot="select-trigger"]');
-  const sortOptions = sortOptionsContainer?.querySelector('[data-slot="select-trigger"]');
   
   // Current filter state
   const filterState = {
@@ -94,42 +88,17 @@ const formatOptions = getFormatOptions();
     });
   }
   
-  // For the shadcn Select components, we need to listen for custom change events
-  document.addEventListener('DOMContentLoaded', function() {
-    // Format filter change event
-    if (formatFilter) {
-      const formatObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
-            const newValue = formatFilter.getAttribute('data-value');
-            if (newValue !== null) {
-              filterState.format = newValue;
-              updateActiveFilters();
-              applyFilters();
-            }
-          }
-        });
-      });
-      
-      formatObserver.observe(formatFilter, { attributes: true });
-    }
-    
-    // Sort options change event
-    if (sortOptions) {
-      const sortObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
-            const newValue = sortOptions.getAttribute('data-value');
-            if (newValue !== null) {
-              filterState.sort = newValue;
-              applyFilters();
-            }
-          }
-        });
-      });
-      
-      sortObserver.observe(sortOptions, { attributes: true });
-    }
+  // Listen for format filter changes
+  document.addEventListener('format-filter-change', (e) => {
+    filterState.format = e.detail.format;
+    updateActiveFilters();
+    applyFilters();
+  });
+  
+  // Listen for sort option changes
+  document.addEventListener('sort-option-change', (e) => {
+    filterState.sort = e.detail.sort;
+    applyFilters();
   });
   
   // Update active filters display
@@ -150,12 +119,9 @@ const formatOptions = getFormatOptions();
     if (filterState.format) {
       createAndAppendBadge(`Format: ${filterState.format}`, () => {
         filterState.format = '';
-        if (formatFilter) {
-          // Reset the select value (this is more complex with shadcn/ui)
-          // We'll dispatch a custom event to reset it
-          const resetEvent = new CustomEvent('reset-format-filter');
-          document.dispatchEvent(resetEvent);
-        }
+        // Dispatch a custom event to reset the format filter
+        const resetEvent = new CustomEvent('reset-format-filter');
+        document.dispatchEvent(resetEvent);
         updateActiveFilters();
         applyFilters();
       });
