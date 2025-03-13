@@ -1,0 +1,195 @@
+---
+import MainLayout from '../layouts/main.astro';
+import CategoryGrid from '../components/CategoryGrid.astro';
+import SearchAndFilter from '../components/SearchAndFilter.astro';
+import { colorAssets } from '../lib/data';
+---
+
+<MainLayout title="Asset Library - Colors" description="Browse and use brand color palette">
+  <div class="container py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight">Colors</h1>
+      <p class="text-muted-foreground">
+        Browse and use the company color palette with hex, RGB, and HSL values.
+      </p>
+    </div>
+    
+    <SearchAndFilter placeholder="Search colors..." assetType="color" showFilters={false} />
+    
+    <div id="colors-grid">
+      <CategoryGrid 
+        assets={colorAssets} 
+        emptyMessage="No colors found matching your search criteria."
+      />
+    </div>
+    
+    <div class="mt-12 space-y-8">
+      <div class="rounded-lg border bg-card p-6">
+        <h2 class="text-xl font-semibold mb-4">Color Usage Guidelines</h2>
+        <div class="space-y-4 text-muted-foreground">
+          <p>
+            Our brand colors are carefully selected to represent our brand identity. Here are some guidelines for using them:
+          </p>
+          <ul class="ml-6 list-disc space-y-2">
+            <li>Use Primary Blue for main UI elements, headers, and primary buttons.</li>
+            <li>Use Secondary Teal for accents, highlights, and secondary UI elements.</li>
+            <li>Use Accent Orange sparingly for calls to action and important elements that need to stand out.</li>
+            <li>Use Neutral Dark for text and UI elements on light backgrounds.</li>
+            <li>Use Neutral Light for backgrounds and UI elements on dark backgrounds.</li>
+          </ul>
+          <p>
+            Always ensure sufficient contrast between text and background colors for accessibility.
+          </p>
+        </div>
+      </div>
+      
+      <div class="rounded-lg border bg-card p-6">
+        <h2 class="text-xl font-semibold mb-4">CSS Variables</h2>
+        <div class="space-y-4">
+          <p class="text-muted-foreground">
+            Use these CSS variables in your projects to maintain consistency:
+          </p>
+          <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+:root {
+  /* Primary Colors */
+  --color-primary: #0066CC;
+  --color-secondary: #00CCAA;
+  --color-accent: #FF6633;
+  
+  /* Neutral Colors */
+  --color-neutral-dark: #333333;
+  --color-neutral-light: #F5F5F5;
+  
+  /* Text Colors */
+  --color-text: var(--color-neutral-dark);
+  --color-text-light: var(--color-neutral-light);
+  
+  /* Background Colors */
+  --color-background: var(--color-neutral-light);
+  --color-background-dark: var(--color-neutral-dark);
+}</pre>
+          <button id="copy-css" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+            Copy CSS Variables
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import type { Asset } from '../lib/types';
+  import { colorAssets } from '../lib/data';
+  
+  // DOM elements
+  const colorsGrid = document.getElementById('colors-grid');
+  const copyCssBtn = document.getElementById('copy-css');
+  
+  // Copy CSS variables to clipboard
+  if (copyCssBtn) {
+    copyCssBtn.addEventListener('click', () => {
+      const cssVariables = `
+:root {
+  /* Primary Colors */
+  --color-primary: #0066CC;
+  --color-secondary: #00CCAA;
+  --color-accent: #FF6633;
+  
+  /* Neutral Colors */
+  --color-neutral-dark: #333333;
+  --color-neutral-light: #F5F5F5;
+  
+  /* Text Colors */
+  --color-text: var(--color-neutral-dark);
+  --color-text-light: var(--color-neutral-light);
+  
+  /* Background Colors */
+  --color-background: var(--color-neutral-light);
+  --color-background-dark: var(--color-neutral-dark);
+}`.trim();
+      
+      navigator.clipboard.writeText(cssVariables).then(() => {
+        showToast('CSS variables copied to clipboard');
+      });
+    });
+  }
+  
+  // Filter and render assets
+  document.addEventListener('filterchange', (e: CustomEvent) => {
+    if (!colorsGrid) return;
+    
+    const { search, sort } = e.detail;
+    
+    // Filter assets
+    let filteredAssets = [...colorAssets];
+    
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredAssets = filteredAssets.filter(asset => 
+        asset.name.toLowerCase().includes(searchLower) || 
+        asset.description?.toLowerCase().includes(searchLower) ||
+        asset.tags?.some(tag => tag.toLowerCase().includes(searchLower)) ||
+        asset.colorValues?.hex.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Apply sorting
+    filteredAssets.sort((a, b) => {
+      switch (sort) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        default:
+          return 0;
+      }
+    });
+    
+    // Render filtered assets
+    renderAssets(filteredAssets);
+  });
+  
+  // Initial render
+  function renderAssets(assets: Asset[]) {
+    if (!colorsGrid) return;
+    
+    if (assets.length === 0) {
+      colorsGrid.innerHTML = `
+        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+          <div class="text-center">
+            <h3 class="text-lg font-medium">No colors found</h3>
+            <p class="text-sm text-muted-foreground">Try adjusting your search</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    colorsGrid.innerHTML = `
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        ${assets.map(asset => `
+          <div class="asset-card" data-id="${asset.id}">
+            <!-- This will be replaced by Astro's hydration -->
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  // Simple toast notification
+  function showToast(message: string) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg transition-opacity duration-300';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 2000);
+  }
+</script>

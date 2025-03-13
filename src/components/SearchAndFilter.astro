@@ -1,0 +1,227 @@
+---
+import { Input } from "./ui/input";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "./ui/select";
+import { Badge } from "./ui/badge";
+
+interface Props {
+  placeholder?: string;
+  showFilters?: boolean;
+  assetType?: "logo" | "favicon" | "color" | "font";
+}
+
+const { 
+  placeholder = "Search assets...", 
+  showFilters = true,
+  assetType
+} = Astro.props;
+
+// Define filter options based on asset type
+function getFormatOptions() {
+  switch (assetType) {
+    case "logo":
+      return ["SVG", "PNG", "JPG"];
+    case "favicon":
+      return ["ICO", "PNG", "SVG"];
+    case "color":
+      return ["All"];
+    case "font":
+      return ["WOFF2", "WOFF", "TTF"];
+    default:
+      return ["All"];
+  }
+}
+
+const formatOptions = getFormatOptions();
+---
+
+<div class="mb-8 space-y-4">
+  <div class="flex flex-col gap-4 sm:flex-row">
+    <!-- Search input -->
+    <div class="relative flex-1">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground z-10 pointer-events-none">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <Input
+        client:load
+        type="search"
+        id="search-input"
+        placeholder={placeholder}
+        className="pl-9"
+      />
+    </div>
+    
+    {showFilters && (
+      <div class="flex gap-2">
+        <!-- Format filter -->
+        <div id="format-filter-container">
+          <Select client:load>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="All Formats" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Formats</SelectItem>
+              {formatOptions.map((format) => (
+                <SelectItem value={format}>{format}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <!-- Sort options -->
+        <div id="sort-options-container">
+          <Select client:load>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Name (A-Z)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+              {assetType !== "color" && (
+                <>
+                  <SelectItem value="size-asc">Size (Small to Large)</SelectItem>
+                  <SelectItem value="size-desc">Size (Large to Small)</SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    )}
+  </div>
+  
+  <!-- Active filters display -->
+  <div id="active-filters" class="flex flex-wrap gap-2"></div>
+</div>
+
+<script define:vars={{ assetType }}>
+  // DOM elements
+  const searchInput = document.getElementById('search-input');
+  const formatFilterContainer = document.getElementById('format-filter-container');
+  const sortOptionsContainer = document.getElementById('sort-options-container');
+  const activeFilters = document.getElementById('active-filters');
+  
+  // Get the actual select elements
+  const formatFilter = formatFilterContainer?.querySelector('[data-slot="select-trigger"]');
+  const sortOptions = sortOptionsContainer?.querySelector('[data-slot="select-trigger"]');
+  
+  // Current filter state
+  const filterState = {
+    search: '',
+    format: '',
+    sort: 'name-asc'
+  };
+  
+  // Event listeners
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      filterState.search = e.target.value;
+      updateActiveFilters();
+      applyFilters();
+    });
+  }
+  
+  // For the shadcn Select components, we need to listen for custom change events
+  document.addEventListener('DOMContentLoaded', function() {
+    // Format filter change event
+    if (formatFilter) {
+      const formatObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
+            const newValue = formatFilter.getAttribute('data-value');
+            if (newValue !== null) {
+              filterState.format = newValue;
+              updateActiveFilters();
+              applyFilters();
+            }
+          }
+        });
+      });
+      
+      formatObserver.observe(formatFilter, { attributes: true });
+    }
+    
+    // Sort options change event
+    if (sortOptions) {
+      const sortObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'data-value') {
+            const newValue = sortOptions.getAttribute('data-value');
+            if (newValue !== null) {
+              filterState.sort = newValue;
+              applyFilters();
+            }
+          }
+        });
+      });
+      
+      sortObserver.observe(sortOptions, { attributes: true });
+    }
+  });
+  
+  // Update active filters display
+  function updateActiveFilters() {
+    if (!activeFilters) return;
+    
+    activeFilters.innerHTML = '';
+    
+    if (filterState.search) {
+      createAndAppendBadge(`Search: ${filterState.search}`, () => {
+        filterState.search = '';
+        if (searchInput) searchInput.value = '';
+        updateActiveFilters();
+        applyFilters();
+      });
+    }
+    
+    if (filterState.format) {
+      createAndAppendBadge(`Format: ${filterState.format}`, () => {
+        filterState.format = '';
+        if (formatFilter) {
+          // Reset the select value (this is more complex with shadcn/ui)
+          // We'll dispatch a custom event to reset it
+          const resetEvent = new CustomEvent('reset-format-filter');
+          document.dispatchEvent(resetEvent);
+        }
+        updateActiveFilters();
+        applyFilters();
+      });
+    }
+  }
+  
+  // Create a badge element using shadcn/ui Badge styling
+  function createAndAppendBadge(text, onRemove) {
+    const badge = document.createElement('div');
+    badge.className = 'inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium';
+    badge.innerHTML = `
+      <span>${text}</span>
+      <button class="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+        <span class="sr-only">Remove filter</span>
+      </button>
+    `;
+    
+    badge.querySelector('button').addEventListener('click', onRemove);
+    activeFilters.appendChild(badge);
+  }
+  
+  // Apply filters to the asset grid
+  function applyFilters() {
+    // Create a custom event with filter state
+    const event = new CustomEvent('filterchange', {
+      detail: filterState
+    });
+    
+    // Dispatch the event for the asset grid to handle
+    document.dispatchEvent(event);
+  }
+</script>

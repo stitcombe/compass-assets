@@ -1,6 +1,14 @@
 ---
 import '../styles/global.css';
-const { content } = Astro.props;
+import Navigation from '../components/Navigation.astro';
+import { Toaster } from '../components/ui/sonner';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Asset Library", description = "Browse and download brand assets" } = Astro.props;
 ---
 
 <html lang="en">
@@ -8,9 +16,25 @@ const { content } = Astro.props;
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>{content.title}</title>
+		<meta name="description" content={description} />
+		<title>{title}</title>
 	</head>
-	<body>
-		<slot />
+	<body class="min-h-screen bg-background font-sans antialiased">
+		<div class="relative flex min-h-screen flex-col">
+			<Navigation />
+			<main class="flex-1">
+				<slot />
+			</main>
+			<footer class="border-t py-6 md:py-0">
+				<div class="container flex flex-col items-center justify-between gap-4 md:h-14 md:flex-row">
+					<p class="text-center text-sm leading-loose text-muted-foreground md:text-left">
+						&copy; {new Date().getFullYear()} Asset Library. All rights reserved.
+					</p>
+				</div>
+			</footer>
+		</div>
+		
+		<!-- Add Sonner Toaster component -->
+		<Toaster client:load />
 	</body>
 </html>

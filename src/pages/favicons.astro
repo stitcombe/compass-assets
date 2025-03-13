@@ -1,0 +1,124 @@
+---
+import MainLayout from '../layouts/main.astro';
+import CategoryGrid from '../components/CategoryGrid.astro';
+import SearchAndFilter from '../components/SearchAndFilter.astro';
+import { faviconAssets } from '../lib/data';
+---
+
+<MainLayout title="Asset Library - Favicons" description="Browse and download website favicons">
+  <div class="container py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight">Favicons</h1>
+      <p class="text-muted-foreground">
+        Browse and download website favicons in different sizes and formats.
+      </p>
+    </div>
+    
+    <SearchAndFilter placeholder="Search favicons..." assetType="favicon" />
+    
+    <div id="favicons-grid">
+      <CategoryGrid 
+        assets={faviconAssets} 
+        emptyMessage="No favicons found matching your search criteria."
+      />
+    </div>
+    
+    <div class="mt-12 rounded-lg border bg-card p-6">
+      <h2 class="text-xl font-semibold mb-4">Favicon Implementation Guide</h2>
+      <div class="space-y-4 text-muted-foreground">
+        <p>
+          To properly implement favicons on your website, include the following code in your HTML head:
+        </p>
+        <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+&lt;link rel="icon" href="/favicon.ico" sizes="any"&gt;
+&lt;link rel="icon" href="/favicon.svg" type="image/svg+xml"&gt;
+&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;
+&lt;link rel="manifest" href="/site.webmanifest"&gt;</pre>
+        <p>
+          This ensures compatibility across different browsers and devices. For more comprehensive favicon support, consider using a favicon generator tool.
+        </p>
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import type { Asset } from '../lib/types';
+  import { faviconAssets } from '../lib/data';
+  
+  // DOM elements
+  const faviconsGrid = document.getElementById('favicons-grid');
+  
+  // Filter and render assets
+  document.addEventListener('filterchange', (e: CustomEvent) => {
+    if (!faviconsGrid) return;
+    
+    const { search, format, sort } = e.detail;
+    
+    // Filter assets
+    let filteredAssets = [...faviconAssets];
+    
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredAssets = filteredAssets.filter(asset => 
+        asset.name.toLowerCase().includes(searchLower) || 
+        asset.description?.toLowerCase().includes(searchLower) ||
+        asset.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Apply format filter
+    if (format) {
+      filteredAssets = filteredAssets.filter(asset => 
+        asset.format.toLowerCase() === format.toLowerCase()
+      );
+    }
+    
+    // Apply sorting
+    filteredAssets.sort((a, b) => {
+      switch (sort) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'size-asc':
+          return (parseInt(a.fileSize || '0') || 0) - (parseInt(b.fileSize || '0') || 0);
+        case 'size-desc':
+          return (parseInt(b.fileSize || '0') || 0) - (parseInt(a.fileSize || '0') || 0);
+        default:
+          return 0;
+      }
+    });
+    
+    // Render filtered assets
+    renderAssets(filteredAssets);
+  });
+  
+  // Initial render
+  function renderAssets(assets: Asset[]) {
+    if (!faviconsGrid) return;
+    
+    if (assets.length === 0) {
+      faviconsGrid.innerHTML = `
+        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+          <div class="text-center">
+            <h3 class="text-lg font-medium">No favicons found</h3>
+            <p class="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    faviconsGrid.innerHTML = `
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        ${assets.map(asset => `
+          <div class="asset-card" data-id="${asset.id}">
+            <!-- This will be replaced by Astro's hydration -->
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+</script>

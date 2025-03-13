@@ -1,0 +1,107 @@
+---
+import MainLayout from '../layouts/main.astro';
+import CategoryGrid from '../components/CategoryGrid.astro';
+import SearchAndFilter from '../components/SearchAndFilter.astro';
+import { logoAssets } from '../lib/data';
+---
+
+<MainLayout title="Asset Library - Logos" description="Browse and download company logos">
+  <div class="container py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight">Logos</h1>
+      <p class="text-muted-foreground">
+        Browse and download company logos in various formats and orientations.
+      </p>
+    </div>
+    
+    <SearchAndFilter placeholder="Search logos..." assetType="logo" />
+    
+    <div id="logos-grid">
+      <CategoryGrid 
+        assets={logoAssets} 
+        emptyMessage="No logos found matching your search criteria."
+      />
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import type { Asset } from '../lib/types';
+  import { logoAssets } from '../lib/data';
+  
+  // DOM elements
+  const logosGrid = document.getElementById('logos-grid');
+  
+  // Filter and render assets
+  document.addEventListener('filterchange', (e: CustomEvent) => {
+    if (!logosGrid) return;
+    
+    const { search, format, sort } = e.detail;
+    
+    // Filter assets
+    let filteredAssets = [...logoAssets];
+    
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredAssets = filteredAssets.filter(asset => 
+        asset.name.toLowerCase().includes(searchLower) || 
+        asset.description?.toLowerCase().includes(searchLower) ||
+        asset.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Apply format filter
+    if (format) {
+      filteredAssets = filteredAssets.filter(asset => 
+        asset.format.toLowerCase() === format.toLowerCase()
+      );
+    }
+    
+    // Apply sorting
+    filteredAssets.sort((a, b) => {
+      switch (sort) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'size-asc':
+          return (parseInt(a.fileSize || '0') || 0) - (parseInt(b.fileSize || '0') || 0);
+        case 'size-desc':
+          return (parseInt(b.fileSize || '0') || 0) - (parseInt(a.fileSize || '0') || 0);
+        default:
+          return 0;
+      }
+    });
+    
+    // Render filtered assets
+    renderAssets(filteredAssets);
+  });
+  
+  // Initial render
+  function renderAssets(assets: Asset[]) {
+    if (!logosGrid) return;
+    
+    if (assets.length === 0) {
+      logosGrid.innerHTML = `
+        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+          <div class="text-center">
+            <h3 class="text-lg font-medium">No logos found</h3>
+            <p class="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    logosGrid.innerHTML = `
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        ${assets.map(asset => `
+          <div class="asset-card" data-id="${asset.id}">
+            <!-- This will be replaced by Astro's hydration -->
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+</script>

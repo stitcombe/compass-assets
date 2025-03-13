@@ -1,0 +1,261 @@
+---
+import MainLayout from '../layouts/main.astro';
+import CategoryGrid from '../components/CategoryGrid.astro';
+import SearchAndFilter from '../components/SearchAndFilter.astro';
+import { fontAssets } from '../lib/data';
+---
+
+<MainLayout title="Asset Library - Fonts" description="Browse and download company fonts">
+  <div class="container py-8">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight">Fonts</h1>
+      <p class="text-muted-foreground">
+        Browse and download company fonts in various weights and styles.
+      </p>
+    </div>
+    
+    <SearchAndFilter placeholder="Search fonts..." assetType="font" />
+    
+    <div id="fonts-grid">
+      <CategoryGrid 
+        assets={fontAssets} 
+        emptyMessage="No fonts found matching your search criteria."
+      />
+    </div>
+    
+    <div class="mt-12 space-y-8">
+      <div class="rounded-lg border bg-card p-6">
+        <h2 class="text-xl font-semibold mb-4">Font Usage Guidelines</h2>
+        <div class="space-y-4 text-muted-foreground">
+          <p>
+            Our brand fonts are carefully selected to represent our brand identity. Here are some guidelines for using them:
+          </p>
+          <ul class="ml-6 list-disc space-y-2">
+            <li>Use Montserrat for headings, navigation, and UI elements.</li>
+            <li>Use Merriweather for body text and long-form content.</li>
+            <li>Use Fira Code for code snippets and technical content.</li>
+            <li>Maintain consistent font weights across the application.</li>
+            <li>Ensure proper font scaling for different screen sizes.</li>
+          </ul>
+          <p>
+            Always ensure proper font loading to avoid FOUT (Flash of Unstyled Text) issues.
+          </p>
+        </div>
+      </div>
+      
+      <div class="rounded-lg border bg-card p-6">
+        <h2 class="text-xl font-semibold mb-4">CSS Implementation</h2>
+        <div class="space-y-4">
+          <p class="text-muted-foreground">
+            Use this CSS to implement our fonts in your projects:
+          </p>
+          <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+/* Font imports */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/assets/fonts/montserrat.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  src: url('/assets/fonts/merriweather.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/assets/fonts/fira-code.woff2') format('woff2');
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Font variables */
+:root {
+  --font-sans: 'Montserrat', system-ui, sans-serif;
+  --font-serif: 'Merriweather', Georgia, serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* Base typography */
+body {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6, button, .nav {
+  font-family: var(--font-sans);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}</pre>
+          <button id="copy-css" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+            Copy CSS
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import type { Asset } from '../lib/types';
+  import { fontAssets } from '../lib/data';
+  
+  // DOM elements
+  const fontsGrid = document.getElementById('fonts-grid');
+  const copyCssBtn = document.getElementById('copy-css');
+  
+  // Copy CSS to clipboard
+  if (copyCssBtn) {
+    copyCssBtn.addEventListener('click', () => {
+      const cssCode = `
+/* Font imports */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/assets/fonts/montserrat.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  src: url('/assets/fonts/merriweather.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/assets/fonts/fira-code.woff2') format('woff2');
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Font variables */
+:root {
+  --font-sans: 'Montserrat', system-ui, sans-serif;
+  --font-serif: 'Merriweather', Georgia, serif;
+  --font-mono: 'Fira Code', monospace;
+}
+
+/* Base typography */
+body {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6, button, .nav {
+  font-family: var(--font-sans);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}`.trim();
+      
+      navigator.clipboard.writeText(cssCode).then(() => {
+        showToast('CSS code copied to clipboard');
+      });
+    });
+  }
+  
+  // Filter and render assets
+  document.addEventListener('filterchange', (e: CustomEvent) => {
+    if (!fontsGrid) return;
+    
+    const { search, format, sort } = e.detail;
+    
+    // Filter assets
+    let filteredAssets = [...fontAssets];
+    
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredAssets = filteredAssets.filter(asset => 
+        asset.name.toLowerCase().includes(searchLower) || 
+        asset.description?.toLowerCase().includes(searchLower) ||
+        asset.tags?.some(tag => tag.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Apply format filter
+    if (format) {
+      filteredAssets = filteredAssets.filter(asset => 
+        asset.format.toLowerCase() === format.toLowerCase()
+      );
+    }
+    
+    // Apply sorting
+    filteredAssets.sort((a, b) => {
+      switch (sort) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'size-asc':
+          return (parseInt(a.fileSize || '0') || 0) - (parseInt(b.fileSize || '0') || 0);
+        case 'size-desc':
+          return (parseInt(b.fileSize || '0') || 0) - (parseInt(a.fileSize || '0') || 0);
+        default:
+          return 0;
+      }
+    });
+    
+    // Render filtered assets
+    renderAssets(filteredAssets);
+  });
+  
+  // Initial render
+  function renderAssets(assets: Asset[]) {
+    if (!fontsGrid) return;
+    
+    if (assets.length === 0) {
+      fontsGrid.innerHTML = `
+        <div class="flex h-[200px] items-center justify-center rounded-md border border-dashed">
+          <div class="text-center">
+            <h3 class="text-lg font-medium">No fonts found</h3>
+            <p class="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    fontsGrid.innerHTML = `
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        ${assets.map(asset => `
+          <div class="asset-card" data-id="${asset.id}">
+            <!-- This will be replaced by Astro's hydration -->
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  // Simple toast notification
+  function showToast(message: string) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg transition-opacity duration-300';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => {
+        document.body.removeChild(toast);
+      }, 300);
+    }, 2000);
+  }
+</script>
