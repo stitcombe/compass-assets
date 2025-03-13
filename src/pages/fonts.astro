@@ -50,11 +50,19 @@ import { fontAssets } from '../lib/data';
             Use this CSS to implement our fonts in your projects:
           </p>
           <pre class="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-/* Font imports */
+{`/* Font imports */
 @font-face {
   font-family: 'Montserrat';
   src: url('/assets/fonts/montserrat.woff2') format('woff2');
-  font-weight: 400 700;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/assets/fonts/montserrat-bold.woff2') format('woff2');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -62,7 +70,15 @@ import { fontAssets } from '../lib/data';
 @font-face {
   font-family: 'Merriweather';
   src: url('/assets/fonts/merriweather.woff2') format('woff2');
-  font-weight: 300 700;
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  src: url('/assets/fonts/merriweather-bold.woff2') format('woff2');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -70,7 +86,15 @@ import { fontAssets } from '../lib/data';
 @font-face {
   font-family: 'Fira Code';
   src: url('/assets/fonts/fira-code.woff2') format('woff2');
-  font-weight: 400 500;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/assets/fonts/fira-code-medium.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
@@ -95,8 +119,9 @@ h1, h2, h3, h4, h5, h6, button, .nav {
 
 code, pre {
   font-family: var(--font-mono);
-}</pre>
-          <button id="copy-css" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+}`}
+</pre>
+          <button id="copy-css" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-green-500 text-white hover:bg-green-600 h-9 px-4 py-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
             Copy CSS
           </button>
@@ -107,7 +132,6 @@ code, pre {
 </MainLayout>
 
 <script>
-  import type { Asset } from '../lib/types';
   import { fontAssets } from '../lib/data';
   
   // DOM elements
@@ -122,7 +146,15 @@ code, pre {
 @font-face {
   font-family: 'Montserrat';
   src: url('/assets/fonts/montserrat.woff2') format('woff2');
-  font-weight: 400 700;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/assets/fonts/montserrat-bold.woff2') format('woff2');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -130,7 +162,15 @@ code, pre {
 @font-face {
   font-family: 'Merriweather';
   src: url('/assets/fonts/merriweather.woff2') format('woff2');
-  font-weight: 300 700;
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Merriweather';
+  src: url('/assets/fonts/merriweather-bold.woff2') format('woff2');
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -138,7 +178,15 @@ code, pre {
 @font-face {
   font-family: 'Fira Code';
   src: url('/assets/fonts/fira-code.woff2') format('woff2');
-  font-weight: 400 500;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/assets/fonts/fira-code-medium.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
@@ -172,7 +220,7 @@ code, pre {
   }
   
   // Filter and render assets
-  document.addEventListener('filterchange', (e: CustomEvent) => {
+  document.addEventListener('filterchange', (e) => {
     if (!fontsGrid) return;
     
     const { search, format, sort } = e.detail;
@@ -218,7 +266,7 @@ code, pre {
   });
   
   // Initial render
-  function renderAssets(assets: Asset[]) {
+  function renderAssets(assets) {
     if (!fontsGrid) return;
     
     if (assets.length === 0) {
@@ -233,29 +281,121 @@ code, pre {
       return;
     }
     
-    fontsGrid.innerHTML = `
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        ${assets.map(asset => `
-          <div class="asset-card" data-id="${asset.id}">
-            <!-- This will be replaced by Astro's hydration -->
+    // Create a CategoryGrid component with the filtered assets
+    const categoryGridHTML = `
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          ${assets.map(asset => renderAssetCard(asset)).join('')}
+        </div>
+      </div>
+    `;
+    
+    fontsGrid.innerHTML = categoryGridHTML;
+    
+    // Add event listeners to the newly rendered buttons
+    setupEventListeners();
+  }
+  
+  // Render a single asset card
+  function renderAssetCard(asset) {
+    // Helper function to format file size
+    const formatFileSize = (fileSize) => {
+      return fileSize || "N/A";
+    };
+    
+    // Helper function to get appropriate preview based on asset type
+    const getPreview = (asset) => {
+      if (asset.type === "font") {
+        return `<div class="h-32 w-full flex items-center justify-center text-2xl" style="font-family: '${asset.name}', sans-serif;">Aa Bb Cc 123</div>`;
+      }
+      
+      return `<img src="${asset.previewUrl}" alt="${asset.name}" class="h-32 w-full object-contain" />`;
+    };
+    
+    // Generate tags HTML if asset has tags
+    const tagsHTML = asset.tags ? 
+      `<div class="flex flex-wrap gap-1">
+        ${asset.tags.map((tag) => 
+          `<div class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium">${tag}</div>`
+        ).join('')}
+      </div>` : '';
+    
+    // Generate font metadata HTML
+    const fontMetadataHTML = `
+      <div class="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+        ${asset.format ? `<div><span class="font-medium">Format:</span> ${asset.format}</div>` : ''}
+        ${asset.fileSize ? `<div><span class="font-medium">Size:</span> ${formatFileSize(asset.fileSize)}</div>` : ''}
+        ${asset.fontWeights ? `<div><span class="font-medium">Weights:</span> ${asset.fontWeights.join(", ")}</div>` : ''}
+        ${asset.fontStyles ? `<div><span class="font-medium">Styles:</span> ${asset.fontStyles.join(", ")}</div>` : ''}
+      </div>
+    `;
+    
+    // Return the complete asset card HTML
+    return `
+      <div class="group relative overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+        <div class="mb-4">
+          <!-- Preview section -->
+          <div class="overflow-hidden rounded-md bg-muted">
+            ${getPreview(asset)}
           </div>
-        `).join('')}
+        </div>
+        
+        <div class="space-y-2">
+          <h3 class="font-medium">${asset.name}</h3>
+          
+          ${asset.description ? `<p class="text-sm text-muted-foreground">${asset.description}</p>` : ''}
+          
+          ${tagsHTML}
+          
+          <!-- Metadata section -->
+          ${fontMetadataHTML}
+          
+          <!-- Action buttons -->
+          <div class="flex flex-wrap gap-2 pt-2">
+            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 download-btn" data-path="${asset.path}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download
+            </button>
+          </div>
+        </div>
       </div>
     `;
   }
   
+  // Setup event listeners for the buttons
+  function setupEventListeners() {
+    // Handle download button clicks
+    document.querySelectorAll('.download-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        const path = button.dataset.path;
+        if (path) {
+          const link = document.createElement('a');
+          link.href = path;
+          link.download = path.split('/').pop() || 'asset';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Show feedback using toast
+          showToast('Font downloaded successfully');
+        }
+      });
+    });
+  }
+  
   // Simple toast notification
-  function showToast(message: string) {
+  function showToast(message) {
     const toast = document.createElement('div');
-    toast.className = 'fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-md shadow-lg transition-opacity duration-300';
+    toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg';
     toast.textContent = message;
     document.body.appendChild(toast);
     
     setTimeout(() => {
       toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.5s ease';
       setTimeout(() => {
         document.body.removeChild(toast);
-      }, 300);
-    }, 2000);
+      }, 500);
+    }, 3000);
   }
 </script>
