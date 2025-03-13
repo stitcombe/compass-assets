@@ -1,13 +1,8 @@
 ---
 import { Input } from "./ui/input";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "./ui/select";
 import { Badge } from "./ui/badge";
+import { FormatFilter } from "./FormatFilter";
+import { SortOptions } from "./SortOptions";
 
 interface Props {
   placeholder?: string;
@@ -60,38 +55,10 @@ const formatOptions = getFormatOptions();
     {showFilters && (
       <div class="flex gap-2">
         <!-- Format filter -->
-        <div id="format-filter-container">
-          <Select client:load>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="All Formats" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All Formats</SelectItem>
-              {formatOptions.map((format) => (
-                <SelectItem value={format}>{format}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <FormatFilter client:load formatOptions={formatOptions} />
         
         <!-- Sort options -->
-        <div id="sort-options-container">
-          <Select client:load>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Name (A-Z)" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
-              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
-              {assetType !== "color" && (
-                <>
-                  <SelectItem value="size-asc">Size (Small to Large)</SelectItem>
-                  <SelectItem value="size-desc">Size (Large to Small)</SelectItem>
-                </>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
+        <SortOptions client:load assetType={assetType} />
       </div>
     )}
   </div>

@@ -1,0 +1,15 @@
+# Code Quality Rules
+
+1. Test Coverage:
+
+   - Before attempting completion, always make sure that any code changes have test coverage
+   - Ensure all tests pass before submitting changes
+
+2. Lint Rules:
+
+   - Never disable any lint rules without explicit user approval
+
+3. Styling Guidelines:
+
+   - always use pnpm, astro, reactjs, shadcn/ui
+   - use vitest for unit tests
