@@ -43,8 +43,8 @@ export const logoAssets: Asset[] = [
     fileSize: "292B",
     dimensions: "240x240",
     previewUrl: "/assets/logos/logo-brand.svg",
-    tags: ["brand", "color", "horizontal"],
-    description: "Primary c0mpass logo for use on light backgrounds",
+    tags: ["brand", "color", "primary"],
+    description: "Primary brand logo for use on light backgrounds",
     variants: [
       {
         name: "PNG (Large)",
@@ -63,13 +63,13 @@ export const logoAssets: Asset[] = [
   {
     id: "logo-monochrome",
     name: "Monochrome Logo",
-    path: "/assets/logos/monochrome-logo.svg",
+    path: "/assets/logos/logo-mono.svg",
     type: "logo",
     format: "SVG",
     fileSize: "20KB",
     dimensions: "240x80",
-    previewUrl: "/assets/logos/monochrome-logo.svg",
-    tags: ["monochrome", "black", "horizontal"],
+    previewUrl: "/assets/logos/logo-mono.svg",
+    tags: ["monochrome", "black", "secondary"],
     description: "Monochrome logo for use on colored backgrounds",
     variants: [
       {
@@ -87,16 +87,42 @@ export const logoAssets: Asset[] = [
     ],
   },
   {
-    id: "logo-vertical",
-    name: "Vertical Logo",
-    path: "/assets/logos/vertical-logo.svg",
+    id: "logo-dark",
+    name: "Dark Logo",
+    path: "/assets/logos/logo-dark.svg",
     type: "logo",
     format: "SVG",
     fileSize: "22KB",
     dimensions: "120x160",
-    previewUrl: "/assets/logos/vertical-logo.svg",
+    previewUrl: "/assets/logos/logo-dark.svg",
+    tags: ["dark", "white"],
+    description: "White logo for use in dark mode",
+    variants: [
+      {
+        name: "PNG (Large)",
+        path: "/assets/logos/vertical-logo-large.png",
+        previewUrl: "/assets/logos/vertical-logo-large.png",
+        dimensions: "600x800",
+      },
+      {
+        name: "PNG (Small)",
+        path: "/assets/logos/vertical-logo-small.png",
+        previewUrl: "/assets/logos/vertical-logo-small.png",
+        dimensions: "300x400",
+      },
+    ],
+  },
+  {
+    id: "logo-boxed",
+    name: "Boxed Logo",
+    path: "/assets/logos/logo-boxed.svg",
+    type: "logo",
+    format: "SVG",
+    fileSize: "22KB",
+    dimensions: "120x160",
+    previewUrl: "/assets/logos/logo-boxed.svg",
     tags: ["vertical", "color", "stacked"],
-    description: "Vertical stacked logo for constrained horizontal spaces",
+    description: "Brand logo boxed in white",
     variants: [
       {
         name: "PNG (Large)",
